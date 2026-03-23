@@ -2,7 +2,7 @@ import streamlit as st
 from extractpbp import extractEventsfromCSV
 from filterEvents import filterSelected
 from generateVideo import get_play_videos
-
+import pprint as pp
 st.title("NBA Play-by-Play Clips")
 st.markdown("""
     <h1 style="font-size: 22px;">This app analyzes NBA play-by-play data to extract player events and statistics.</h1>
@@ -28,8 +28,18 @@ if submit_button:
     filteredEvents=filterSelected(playerEvents[player], filter, [])
     if not filteredEvents:
         st.warning(f"No events found for {player} with the selected filters.")
-    st.subheader(f"Filtered Events for {player}")
-    videoEvents=get_play_videos(filteredEvents)
+    st.subheader(f"Filtered Events for {player}", anchor=None)
+    videoEvents, retryArr=get_play_videos(filteredEvents)
+    newEvents=[]
+    if retryArr:
+        retry_message = f"Note: {len(retryArr)} events could not be retrieved due to server errors and were skipped."
+        st.warning(retry_message)
+        newEvents = filterSelected(playerEvents[player], filter, retryArr)
+        if newEvents:
+            st.subheader(f"Retrying Failed Events for {player}", anchor=None)
+            videoEvents, retryArr = get_play_videos(newEvents)
+            if retryArr:
+                st.warning(f"Note: {len(retryArr)} events still could not be retrieved after retrying.")
     for event in videoEvents:
         st.markdown(f"**{event['player']}**")
         st.markdown(f"Type: {event['desc']}")

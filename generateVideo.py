@@ -1,4 +1,5 @@
 import requests
+import pprint as pp
 import time
 headers = {
     "Accept": "application/json, text/plain, */*",
@@ -10,6 +11,7 @@ headers = {
 }
 def get_play_videos(events):
     event_videos = []
+    retryArr=[]
     url = "https://stats.nba.com/stats/videoeventsasset"
     for event in events:
         if event['videoAvailable']:
@@ -20,7 +22,10 @@ def get_play_videos(events):
             "GameID": game_id
             }
             response = requests.get(url, headers=headers, params=params)
-            response.raise_for_status()
+            if response.status_code == 500:
+                print(f"Server error for GameID: {game_id}, EventID: {event_id}. Skipping.")
+                retryArr.append((game_id, event_id))
+                continue
             data = response.json()
             video_url = data["resultSets"]["Meta"]["videoUrls"][0]["lurl"]
             event_videos.append({
@@ -30,9 +35,10 @@ def get_play_videos(events):
             'desc':event['description'],
             'player': event['playerNameI'],
             })   
-            time.sleep(2)  # to avoid hitting rate limits
+            time.sleep(0.5)
         else:
-            continue  
-    return event_videos
+            continue
+        pp.pprint(event_videos)    
+    return event_videos, retryArr
    
    
