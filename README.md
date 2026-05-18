@@ -1,20 +1,61 @@
 # 🏀 BasketClips
-A Streamlit app that takes official NBA play-by-play data and lets you filter and generate clips for any player's events in a game.
+BasketClips is a Streamlit app for extracting and previewing NBA player event clips from official NBA play-by-play data.
 
-### Features
-Upload official NBA play-by-play data as a CSV. \
-Select a player to focus on \
-Filter by specific event types (shots, rebounds, turnovers etc.) \
-Generate clips for the selected events. 
+## Features
+- Upload an NBA play-by-play CSV file (stats.nba.com format).
+- Search by team matchup using NBA API data.
+- Select a player and filter by event type.
+- Generate clips for the selected player events.
+- Preview clip videos directly in the app.
+- Optional experimental FFmpeg export for combined video playback.
 
-### To run locally
-Clone the repository \
-Install the dependencies in `requirements.txt` \
-Run the app using the command: `streamlit run app.py` \
-A sample `play_by_play.csv` is included in the repository for testing and demonstration purposes.
-### Using the App:
-1. Get play-by-play data — Obtain an official NBA play-by-play CSV from the NBA site or using the nba_api Python package.
-2. Upload the CSV — Use the file uploader on the app's main page.
-3. Select a player — Choose the player whose events you want to see.
-4. Filter events — Pick the event types you'd like to include.
-5. Generate clips — View and export the resulting clips.
+## Requirements
+- Python 3.10+ recommended
+- Streamlit
+- `requirements.txt` contains the project dependencies
+
+## Installation
+1. Clone the repository:
+   ```powershell
+   git clone <repo-url>
+   cd BasketClips
+   ```
+2. Activate the virtual environment:
+   ```powershell
+   .\env\Scripts\Activate.ps1
+   ```
+3. Install the dependencies:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+## Run the app
+```powershell
+streamlit run app.py
+```
+
+## How to use
+1. Open the app in your browser after Streamlit starts.
+2. Choose between:
+   - `Team Matchup` to search NBA matchups using the built-in NBA API integration.
+   - `Upload CSV` to provide your own NBA play-by-play CSV file.
+3. Select a player from the extracted events list.
+4. Apply event filters such as shot made, shot missed, foul, steal, turnover, assist, free throw, or rebound.
+5. Generate clips and preview videos directly in the app.
+6. If enabled, the experimental FFmpeg export option will attempt to export combined videos.
+
+## Notes
+- The CSV uploader currently supports play-by-play data in the stats.nba.com format.
+- The FFmpeg export feature is experimental and may not work for every video or event.
+- The repository includes a sample `play_by_play.csv` for testing.
+
+## Files of interest
+- `app.py` — Streamlit app entry point
+- `extractpbp.py` — Parse and extract events from play-by-play data
+- `filterEvents.py` — Filter extracted events
+- `generateVideo.py` — Retrieve video clips for events
+- `exportVideo.py` — Export videos with FFmpeg
+- `loadTeams.py` — Load NBA team and season metadata
+
+## License
+This project is provided as-is. Modify and extend it for your own NBA clip generation workflows.

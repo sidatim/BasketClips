@@ -1,0 +1,78 @@
+{
+    "2025-26": {
+        "finals": "42025",
+        "play_in": "52025",
+        "preseason": "22025",
+        "playoffs": "32025",
+        "other": "62025",
+        "regular_season": "12025"
+    },
+    "2024-25": {
+        "finals": "42024",
+        "play_in": "52024",
+        "preseason": "22024",
+        "playoffs": "32024",
+        "other": "62024",
+        "regular_season": "12024"
+    },
+    "2023-24": {
+        "finals": "42023",
+        "play_in": "52023",
+        "preseason": "22023",
+        "playoffs": "32023",
+        "other": "62023",
+        "regular_season": "12023"
+    },
+    "2022-23": {
+        "finals": "42022",
+        "play_in": "52022",
+        "preseason": "22022",
+        "playoffs": "32022",
+        "regular_season": "12022"
+    },
+    "2021-22": {
+        "finals": "42021",
+        "play_in": "52021",
+        "preseason": "22021",
+        "playoffs": "32021",
+        "regular_season": "12021"
+    },
+    "2020-21": {
+        "finals": "42020",
+        "play_in": "52020",
+        "preseason": "22020",
+        "playoffs": "32020",
+        "regular_season": "12020"
+    },
+    "2019-20": {
+        "finals": "42019",
+        "play_in": "52019",
+        "preseason": "22019",
+        "regular_season": "12019",
+        "playoffs": "32019"
+    },
+    "2018-19": {
+        "finals": "42018",
+        "preseason": "22018",
+        "playoffs": "32018",
+        "regular_season": "12018"
+    },
+    "2017-18": {
+        "finals": "42017",
+        "preseason": "22017",
+        "playoffs": "32017",
+        "regular_season": "12017"
+    },
+    "2016-17": {
+        "finals": "42016",
+        "preseason": "22016",
+        "playoffs": "32016",
+        "regular_season": "12016"
+    },
+    "2015-16": {
+        "finals": "42015",
+        "preseason": "22015",
+        "playoffs": "32015",
+        "regular_season": "12015"
+    }
+}
