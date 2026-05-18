@@ -2,7 +2,7 @@ import streamlit as st
 from nba_api.stats.endpoints import leaguegamefinder
 from extractpbp import extractEventsfromCSV, getEventsforGame
 from filterEvents import filterSelected
-from generateVideo import get_play_videos, download_video
+from generateVideo import get_play_videos
 from loadTeams import load_teams, load_seasons
 from exportVideo import export_video
 import pandas as pd
