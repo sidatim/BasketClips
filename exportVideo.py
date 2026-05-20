@@ -13,13 +13,14 @@ def export_video(videoEvents):
         headers="Accept: application/json, text/plain, */*\r\nAccept-Language: en-US,en;q=0.9\r\nReferer: https://www.nba.com/\r\n User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\r\nx-nba-stats-origin: stats\r\nx-nba-stats-token: true\r\n"
     ) for video in videos]
         video_streams = [inp.video for inp in inputs]
-        #audio_streams = [inp.audio for inp in inputs]
+        audio_streams = [inp.audio for inp in inputs]
+        combined=[s for pair in zip(video_streams, audio_streams) for s in pair]
         (
             ffmpeg
             .concat(
-                *video_streams,
+                *combined,
                 v=1,
-                a=0,
+                a=1,
             )
             .output(
                output_filename,
