@@ -1,6 +1,6 @@
 import streamlit as st
 from nba_api.stats.endpoints import leaguegamefinder
-from extractpbp import extractEventsfromCSV, getEventsforGame
+from extractpbp import extractEventsfromCSV, getEventsforGame, getTeamEvents
 from filterEvents import filterSelected
 from generateVideo import get_play_videos
 from loadTeams import load_teams, load_seasons
@@ -76,9 +76,12 @@ if player:
 
 
 if submit_button:
+    team=playerEvents[player][0]['teamTricode']
+    teamEvents=getTeamEvents(playerEvents, team)
     filteredEvents=filterSelected(playerEvents[player], filter, [])
     if not filteredEvents:
         st.warning(f"No events found for {player} with the selected filters.")
+        st.stop()
     st.subheader(f"Filtered Events for {player}", anchor=None)
     videoEvents, retryArr=get_play_videos(filteredEvents)
     newEvents=[]
@@ -94,7 +97,7 @@ if submit_button:
         st.markdown("Exporting videos with ffmpeg...")
         combinedVideos=export_video(videoEvents)
         if combinedVideos==-1:
-            st.error("FFmpeg export failed. Please check the console for more details.")
+            st.error("FFmpeg export failed.")
         else:
             st.video(combinedVideos)
     if not videoEvents:
