@@ -1,6 +1,5 @@
 import requests
 import time
-from datetime import datetime
 import re
 eventPriority={
     "Made Shot": 4,
