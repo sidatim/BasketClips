@@ -1,3 +1,4 @@
+
 def filterSelected(playerEvents, filter, teamEvents):
     filteredEvents = []
     for event in playerEvents:
@@ -11,6 +12,9 @@ def filterSelected(playerEvents, filter, teamEvents):
             filteredEvents.append(event)
         elif  'turnover'in filter and event['actionType'] == 'Turnover':
             filteredEvents.append(event)
-        elif  'free throw' in filter and event['actionType'] == 'Free Throw':
+        elif 'free throw' in filter and event['actionType'] == 'Free Throw':
+            filteredEvents.append(event)
+        elif 'rebound' in filter and event['actionType'] == 'Rebound':
             filteredEvents.append(event)
     return filteredEvents
+
