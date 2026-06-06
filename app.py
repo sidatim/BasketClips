@@ -69,7 +69,7 @@ if choice == "Upload CSV":
 
 if player:
     with st.form("filter_form"):
-        filter=st.multiselect("Filter events by type (assists not working for now)", options=['shot made', 'shot missed', 'foul', 'steal', 'turnover', 'assist', 'free throw', 'rebound'], default=None)
+        filter=st.multiselect("Filter events by type", options=['shot made', 'shot missed', 'foul', 'steal', 'turnover', 'assist', 'free throw', 'rebound'], default=None)
         submit_button=st.form_submit_button("Apply Filters")
         
 
@@ -78,7 +78,7 @@ if player:
 if submit_button:
     team=playerEvents[player][0]['teamTricode']
     teamEvents=getTeamEvents(playerEvents, team)
-    filteredEvents=filterSelected(playerEvents[player], filter, [])
+    filteredEvents=filterSelected(playerEvents[player], filter, teamEvents)
     if not filteredEvents:
         st.warning(f"No events found for {player} with the selected filters.")
         st.stop()
