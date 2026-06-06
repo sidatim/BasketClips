@@ -31,7 +31,7 @@ def filterSelected(playerEvents, filter, teamEvents):
 
     if filter and 'assist' in filter:
         assister_name = playerEvents[0]['playerNameI'] if playerEvents else ''
-        assister_last = assister_name.split()[-1] if assister_name else ''
+        assister_last = playerEvents[0]['playerName'] if playerEvents else ''
         flat_team = flatten_team_events(teamEvents)
         for ev in flat_team:
             if ev.get('actionType') != 'Made Shot':
