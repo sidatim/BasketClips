@@ -1,6 +1,4 @@
 import json
-
-
 def load_teams():
     teams=[]
     with open("nba_teams.json", "r") as f:
