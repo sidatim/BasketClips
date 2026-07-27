@@ -1,6 +1,8 @@
 import requests
 import time
 import re
+import streamlit as st
+import random
 eventPriority={
     "Made Shot": 4,
     "Missed Shot": 4,
@@ -8,6 +10,7 @@ eventPriority={
     "Steal": 3,
     "Turnover": 2,
     "Free Throw": 1,
+    "Foul":1
 }
 headers = {
     "Accept": "application/json, text/plain, */*",
@@ -17,6 +20,8 @@ headers = {
     "x-nba-stats-origin": "stats",
     "x-nba-stats-token": "true",
 }
+# proxy=random.choice(st.secrets["PROXY_LIST"]) if "PROXY_LIST" in st.secrets else None
+proxy=None
 def get_play_videos(events):
     print("Fetching video URLs for events...")
     event_videos = []
@@ -36,17 +41,12 @@ def get_play_videos(events):
             "GameEventID": event_id,
             "GameID": game_id
             }
-            
-            try:
-                response = requests.get(url, headers=headers, params=params)
-                print(f"Requesting video for GameID: {game_id}, EventID: {event_id} - Status Code: {response.status_code}")
-                if response.status_code == 500:
-                    print(f"Server error for GameID: {game_id}, EventID: {event_id}. Skipping.")
-                    retryArr.append((game_id, event_id))
+            video_url=request_video_url(game_id,event_id)
+            if type(video_url) is Exception:
+                    print(video_url)
+                    retryArr.append(event)
                     continue
-                data = response.json()
-                video_url = data["resultSets"]["Meta"]["videoUrls"][0]["lurl"]
-                event_videos.append({
+            event_videos.append({
                 'gameId': game_id,
                 'eventId': event_id,
                 'videoUrl': video_url,
@@ -57,11 +57,8 @@ def get_play_videos(events):
                 'period': period,
                 'priority': eventPriority[action] if action else 0
                 })   
-                time.sleep(0.5)
-            except Exception as e:
-                print(f"Error fetching video for GameID: {game_id}, EventID: {event_id} - {e}")
-                retryArr.append((game_id, event_id))
-                continue
+            time.sleep(0.5)
+
         else:
             print(f"No video available for GameID: {event['gameId']}, EventID: {event['actionNumber']}. Skipping.")
             continue
@@ -69,8 +66,24 @@ def get_play_videos(events):
     filteredEvents=filterDuplicateClips(event_videos)
     return filteredEvents, retryArr
 
-
-
+@st.cache_data
+def request_video_url(game_id, event_id):
+    url = "https://stats.nba.com/stats/videoeventsasset"
+    params = {
+        "GameEventID": event_id,
+        "GameID": game_id
+    }
+    try:
+        response = requests.get(url, headers=headers, params=params, proxies={"http": proxy, "https": proxy} if proxy else None, timeout=10)
+        if response.status_code != 200:
+            print(f"Server error for GameID: {game_id}, EventID: {event_id}. Status Code: {response.status_code}")
+            raise Exception(f"Server error: {response.status_code}")
+        data = response.json()
+        video_url = data["resultSets"]["Meta"]["videoUrls"][0]["lurl"]
+        return video_url
+    except Exception as e:
+        print(f"Error fetching video for GameID: {game_id}, EventID: {event_id} - {e}")
+        return e
 
 def convertTimeStamp(duration):
     match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?', duration)

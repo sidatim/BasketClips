@@ -2,33 +2,7 @@
 import re
 def filterSelected(playerEvents, filter, teamEvents):
     filteredEvents = []
-    def flatten_team_events(team_events):
-        flat = []
-        if not team_events:
-            return flat
-        for item in team_events:
-            if isinstance(item, list):
-                flat.extend(item)
-            elif isinstance(item, dict):
-                flat.append(item)
-        return flat
-
-    def safe_int(value, default=0):
-        try:
-            return int(value)
-        except Exception:
-            return default
-
-    def _sort_events(events):
-        return sorted(
-            events,
-            key=lambda ev: (
-                str(ev.get('gameId', '')),
-                safe_int(ev.get('period', 0)),
-                safe_int(ev.get('actionNumber') or ev.get('eventId') or 0),
-            ),
-        )
-
+    
     if filter and 'assist' in filter:
         assister_name = playerEvents[0]['playerNameI'] if playerEvents else ''
         assister_last = playerEvents[0]['playerName'] if playerEvents else ''
@@ -64,5 +38,31 @@ def filterSelected(playerEvents, filter, teamEvents):
         elif 'rebound' in filter and event['actionType'] == 'Rebound':
             filteredEvents.append(event)
 
-    return _sort_events(filteredEvents)
+    return sort_events(filteredEvents)
 
+def flatten_team_events(team_events):
+        flat = []
+        if not team_events:
+            return flat
+        for item in team_events:
+            if isinstance(item, list):
+                flat.extend(item)
+            elif isinstance(item, dict):
+                flat.append(item)
+        return flat
+
+def safe_int(value, default=0):
+        try:
+            return int(value)
+        except Exception:
+            return default
+
+def sort_events(events):
+        return sorted(
+            events,
+            key=lambda ev: (
+                str(ev.get('gameId', '')),
+                safe_int(ev.get('period', 0)),
+                safe_int(ev.get('actionNumber') or ev.get('eventId') or 0),
+            ),
+        )
