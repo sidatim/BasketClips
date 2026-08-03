@@ -2,7 +2,6 @@ import requests
 import time
 import re
 import streamlit as st
-import random
 eventPriority={
     "Made Shot": 4,
     "Missed Shot": 4,
@@ -20,13 +19,11 @@ headers = {
     "x-nba-stats-origin": "stats",
     "x-nba-stats-token": "true",
 }
-# proxy=random.choice(st.secrets["PROXY_LIST"]) if "PROXY_LIST" in st.secrets else None
-proxy=None
+proxy=st.session_state["proxy"]
 def get_play_videos(events):
     print("Fetching video URLs for events...")
     event_videos = []
     retryArr=[]
-    print(f"Total events to process: {len(events)}")
     url = "https://stats.nba.com/stats/videoeventsasset"
     for event in events:
         if event['videoAvailable']:
@@ -41,11 +38,12 @@ def get_play_videos(events):
             "GameEventID": event_id,
             "GameID": game_id
             }
-            video_url=request_video_url(game_id,event_id)
-            if type(video_url) is Exception:
-                    print(video_url)
-                    retryArr.append(event)
-                    continue
+            try:
+                video_url=request_video_url(game_id,event_id)
+            except Exception as e:
+                print(f"Error fetching video URL for GameID: {game_id}, EventID: {event_id}. Error: {e}")
+                retryArr.append(event)
+                continue
             event_videos.append({
                 'gameId': game_id,
                 'eventId': event_id,
@@ -66,25 +64,17 @@ def get_play_videos(events):
     filteredEvents=filterDuplicateClips(event_videos)
     return filteredEvents, retryArr
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def request_video_url(game_id, event_id):
     url = "https://stats.nba.com/stats/videoeventsasset"
     params = {
         "GameEventID": event_id,
         "GameID": game_id
     }
-    try:
-        response = requests.get(url, headers=headers, params=params, proxies={"http": proxy, "https": proxy} if proxy else None, timeout=10)
-        if response.status_code != 200:
-            print(f"Server error for GameID: {game_id}, EventID: {event_id}. Status Code: {response.status_code}")
-            raise Exception(f"Server error: {response.status_code}")
-        data = response.json()
-        video_url = data["resultSets"]["Meta"]["videoUrls"][0]["lurl"]
-        return video_url
-    except Exception as e:
-        print(f"Error fetching video for GameID: {game_id}, EventID: {event_id} - {e}")
-        return e
-
+    response = requests.get(url, headers=headers, params=params, proxies={"http": proxy, "https": proxy} if proxy else None, timeout=10)  
+    data = response.json()
+    video_url = data["resultSets"]["Meta"]["videoUrls"][0]["lurl"]
+    return video_url
 def convertTimeStamp(duration):
     match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?', duration)
     h, m, s = (float(x or 0) for x in match.groups())

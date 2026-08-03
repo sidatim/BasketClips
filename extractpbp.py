@@ -29,17 +29,14 @@ def validate_csv(csv_file):
         st.stop()
         return
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def getEventsforGame(event):
         game_id = event['GAME_ID']
-        try:
-            pbp = playbyplayv3.PlayByPlayV3(game_id=game_id, timeout=10)
-            data = pbp.get_data_frames()[0].to_csv(index=False).encode('utf-8')  
-            return data
-        except Exception as e:
-            print(f"Error fetching play-by-play data for game {event}: {e}")
-            return None
-@st.cache_data       
+        pbp = playbyplayv3.PlayByPlayV3(game_id=game_id, timeout=10)
+        data = pbp.get_data_frames()[0].to_csv(index=False).encode('utf-8')  
+        return data
+        
+@st.cache_data(show_spinner=False)     
 def extractEventsfromCSV(csvExport):
     playerEvents = dict()
     validate_csv(csvExport)
@@ -73,7 +70,7 @@ def extractEventsfromCSV(csvExport):
     playerEvents.pop('', None)
     playerEvents.pop('nan', None)
     return playerEvents        
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def getTeamEvents(playerEvents, team):
     teamEvents=[]
     for event in playerEvents:

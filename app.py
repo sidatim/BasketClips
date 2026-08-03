@@ -1,4 +1,7 @@
 import streamlit as st
+import random
+if 'proxy' not in st.session_state:
+    st.session_state['proxy']=random.choice(st.secrets["PROXY_LIST"]) if "PROXY_LIST" in st.secrets else None 
 from nba_api.stats.endpoints import leaguegamefinder
 from extractpbp import extractEventsfromCSV, getEventsforGame, getTeamEvents
 from filterEvents import filterSelected, sort_events
@@ -7,13 +10,14 @@ from loadTeams import load_teams, load_seasons
 from exportVideo import export_video
 import pandas as pd
 import time
-import pprint as pp
-@st.cache_data
+@st.cache_data(show_spinner=False) ##here, make sure to only cache the data if we get a successful response from the API
 def getGames(team1, team2, season=None):
-    return leaguegamefinder.LeagueGameFinder(team_id_nullable=team1, vs_team_id_nullable=team2, season_nullable=season, timeout=10)
-
+        gamefinder = leaguegamefinder.LeagueGameFinder(team_id_nullable=team1, vs_team_id_nullable=team2, season_nullable=season, timeout=10)
+        return gamefinder
+  
 if 'matchup_df' not in st.session_state:
     st.session_state['matchup_df'] = ''
+
 def filterChangeCallback():
      st.session_state["matchup_df"]=""
 
@@ -23,7 +27,6 @@ st.markdown("""
     <p class="intro-text">Upload a CSV file containing play-by-play data to get started. (supports only data from stats.nba.com)</p>
     <p class="intro-text">Or choose 2 teams to get a matchup for them</p>
 """, unsafe_allow_html=True)
-
 generateFile=None
 filteredEvents=None
 submit_button=None
@@ -52,10 +55,12 @@ if choice == "Team Matchup":
         st.session_state['team2']=team2
         team1_id = next(team['teamId'] for team in teams if team['teamName'] == team1)
         team2_id = next(team['teamId'] for team in teams if team['teamName'] == team2)
-        gamefinder = getGames(team1_id, team2_id, seasonSelectStart)
-        if type(gamefinder)==int:
-             st.error(f"Error fetching games: {gamefinder}")
-             st.stop()
+        try:
+            gamefinder = getGames(team1_id, team2_id, seasonSelectStart)
+        except Exception as e:
+            print(f"Error fetching games: {e}")
+            st.error(f"Error fetching games: please try again later.")
+            st.stop()
         games = gamefinder.get_data_frames()[0]
         df = pd.DataFrame(games)
         st.session_state['matchup_df'] = games
@@ -66,14 +71,18 @@ if choice == "Team Matchup":
         selected_game=st.dataframe(st.session_state['matchup_df'][['GAME_DATE', 'MATCHUP', 'WL', 'PTS', 'REB', 'AST']], on_select="rerun", selection_mode="single-row")
         if selected_game.selection.rows:
             selected_df=st.session_state['matchup_df'].iloc[selected_game.selection.rows[0]]
-            generateFile=getEventsforGame(selected_df)
+            try:
+                generateFile=getEventsforGame(selected_df)
+            except Exception as e:
+                st.error(f"Error fetching play-by-play data for game {selected_df['GAME_ID']}. Please try again later.")
+                st.stop()
 if generateFile:
     playerEvents=extractEventsfromCSV(generateFile)
     player=st.selectbox("Select a player to view their events", options=playerEvents.keys(), placeholder="Select a player", format_func=lambda name: f"{name} - {playerEvents[name][0]['teamTricode']}" if playerEvents[name] else name)
 
 if choice == "Upload CSV":
         uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-        ffmpegCheck=st.checkbox("Export videos with ffmpeg (experimental)", key="ffmpeg_checkbox")
+        ffmpegCheck=st.checkbox("Export videos with FFMPEG", key="ffmpeg_checkbox")
         if uploaded_file is not None and uploaded_file.name.endswith('.csv'):
             file = uploaded_file.read()
             playerEvents=extractEventsfromCSV(file)
@@ -96,7 +105,8 @@ if submit_button:
         st.warning(f"No events found for {player} with the selected filters.")
         st.stop()
     st.subheader(f"Filtered Events for {player}", anchor=None)
-    videoEvents, failedEvents=get_play_videos(filteredEvents)
+    with st.spinner("Generating video URLs for events...", show_time=False):
+        videoEvents, failedEvents=get_play_videos(filteredEvents)
     missingVideos=[]
     if failedEvents:
         st.warning(f"Note: {len(failedEvents)} events could not be retrieved, retrying.")

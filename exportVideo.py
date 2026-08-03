@@ -1,8 +1,6 @@
 import ffmpeg
-import random
 import os
 import streamlit as st
-import pprint as pp
 def check_for_audio(streams):
     for stream in streams:
         if not stream['streams']:
@@ -16,7 +14,7 @@ def export_video(videoEvents):
     gameid=videoEvents[0]['gameId']
     output_filename = f"{player}_{gameid}.mp4"
     try:
-        proxy=random.choice(st.secrets["PROXY_LIST"]) if "PROXY_LIST" in st.secrets else None
+        proxy=st.session_state["proxy"]
         audioProbe=[ffmpeg.probe(video,
             headers="Accept: application/json, text/plain, */*\r\nAccept-Language: en-US,en;q=0.9\r\nReferer: https://www.nba.com/\r\n User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\r\nx-nba-stats-origin: stats\r\nx-nba-stats-token: true\r\n",
         select_streams='a'
@@ -25,7 +23,7 @@ def export_video(videoEvents):
     ffmpeg.input(
         video,
         headers="Accept: application/json, text/plain, */*\r\nAccept-Language: en-US,en;q=0.9\r\nReferer: https://www.nba.com/\r\n User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36\r\nx-nba-stats-origin: stats\r\nx-nba-stats-token: true\r\n",
-        #http_proxy=proxy
+        http_proxy=proxy
     
     ) for video in videos]
         video_streams = [inp.video for inp in inputs]
@@ -33,7 +31,7 @@ def export_video(videoEvents):
         valid_audio_streams=check_for_audio(audioProbe)
         if not valid_audio_streams:
             for i, audio in enumerate(audio_streams):
-                audio_streams[i]=ffmpeg.input('anullsrc',)
+                audio_streams[i]=ffmpeg.input('anullsrc')
         combined=[s for pair in zip(video_streams, audio_streams) for s in pair]
         if valid_audio_streams:
             (

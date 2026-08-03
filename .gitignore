@@ -1,6 +1,7 @@
 __pycache__
 env
 teams.*
-*play_by_play.csv
+play_by_play.csv
 *.mp4
 .streamlit
+test.py
